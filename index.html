@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Beauty of Chess: An Interactive Beginner's Course</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      /* Custom styles for piece SVGs */
+      .chess-piece-svg {
+        width: 48px; /* Adjust size as needed */
+        height: 48px;
+        fill: currentColor; /* Allows coloring with Tailwind text-color classes */
+      }
+      .bg-gradient-to-br-custom {
+        background-image: linear-gradient(
+          to bottom right,
+          #6ee7b7,
+          #34d399
+        ); /* Teal to Emerald */
+      }
+      .bg-gradient-to-br-dark-custom {
+        background-image: linear-gradient(
+          to bottom right,
+          #1f2937,
+          #374151
+        ); /* Dark Gray to Slate */
+      }
+      /* Styles for interactive board */
+      .interactive-board {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: repeat(8, 1fr);
+        width: 240px; /* Smaller board for demonstration */
+        height: 240px;
+        border: 2px solid #4b5563; /* gray-700 */
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      .interactive-square {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+        user-select: none; /* Prevent text selection */
+      }
+      .square-light {
+        background-color: #f3f4f6; /* gray-100 */
+      }
+      .square-dark {
+        background-color: #9ca3af; /* gray-400 */
+      }
+      .square-highlight {
+        background-color: #fcd34d; /* amber-300 */
+      }
+      .square-start {
+        background-color: #10b981; /* emerald-500 */
+      }
+      .square-check {
+        background-color: #ef4444; /* red-500 */
+      }
+
+      .interactive-piece {
+        width: 80%;
+        height: 80%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.8rem; /* Larger for pieces */
+        color: #1f2937; /* Dark gray for pieces */
+      }
+      .interactive-piece-white {
+        color: #f9fafb;
+      } /* White for pieces */
+      .interactive-piece-black {
+        color: #1f2937;
+      } /* Black for pieces */
+
+      /* Styles for message box */
+      .message-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        display: none; /* Hidden by default */
+      }
+      .message-box-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none; /* Hidden by default */
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-800 antialiased leading-relaxed">
+    <div
+      class="min-h-screen flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8"
+    >
+      <!-- Header Section -->
+      <header class="w-full max-w-4xl text-center mb-12">
+        <h1
+          class="text-5xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight"
+        >
+          The <span class="text-teal-600">Beauty</span> of Chess
+        </h1>
+        <p class="text-xl text-gray-600">
+          An Interactive Beginner's Journey into the World's Most Elegant Game
+        </p>
+      </header>
+
+      <!-- Main Content Area -->
+      <main
+        class="w-full max-w-4xl bg-white shadow-xl rounded-2xl p-8 sm:p-10 lg:p-12 mb-12"
+      >
+        <!-- Introduction -->
+        <section class="mb-10">
+          <h2 class="text-3xl font-bold text-teal-700 mb-4">
+            Welcome, Future Chess Enthusiast!
+          </h2>
+          <p class="text-lg text-gray-700 mb-4">
+            Chess is more than just a game; it's an art form, a science, and a
+            captivating intellectual battle. For centuries, it has fascinated
+            minds with its blend of logic, strategy, and boundless creativity.
+            It's a game where every move tells a story, and every position holds
+            a hidden beauty.
+          </p>
+          <p class="text-lg text-gray-700">
+            In this course, we'll not only learn the basics of how to play but
+            also explore *why* chess is considered such a beautiful and
+            enriching experience. Let's begin our journey!
+          </p>
+        </section>
+
+        <!-- The Chessboard -->
+        <section class="mb-10 p-6 bg-gray-50 rounded-xl shadow-inner">
+          <h2 class="text-3xl font-bold text-teal-700 mb-4">
+            The Stage: The Chessboard
+          </h2>
+          <p class="text-lg text-gray-700 mb-4">
+            The game of chess is played on a square board made of 64 alternating
+            light and dark squares, arranged in an 8x8 grid. Think of it as a
+            battlefield where two armies will clash.
+          </p>
+          <div class="flex justify-center items-center mb-6">
+            <!-- Simple representation of a chessboard -->
+            <div
+              class="grid grid-cols-8 grid-rows-8 w-64 h-64 border-2 border-gray-400 rounded-lg overflow-hidden shadow-md"
+            >
+              <script>
+                // Generate chessboard squares dynamically for visual representation
+                const boardDiv = document.querySelector(".grid.grid-cols-8");
+                for (let i = 0; i < 64; i++) {
+                  const row = Math.floor(i / 8);
+                  const col = i % 8;
+                  const isDark = (row + col) % 2 === 1;
+                  const square = document.createElement("div");
+                  square.className = `w-8 h-8 ${
+                    isDark ? "bg-gray-600" : "bg-gray-200"
+                  }`;
+                  boardDiv.appendChild(square);
+                }
+              </script>
+            </div>
+          </div>
+          <ul class="list-disc list-inside text-lg text-gray-700 space-y-2">
+            <li>
+              The rows are called
+              <strong class="font-semibold text-teal-600">ranks</strong>
+              (numbered 1 to 8).
+            </li>
+            <li>
+              The columns are called
+              <strong class="font-semibold text-teal-600">files</strong>
+              (lettered 'a' to 'h').
+            </li>
+            <li>Each square has a unique name, like 'e4' or 'd5'.</li>
+          </ul>
+        </section>
+
+        <!-- The Chess Pieces -->
+        <section class="mb-10 p-6 bg-gray-50 rounded-xl shadow-inner">
+          <h2 class="text-3xl font-bold text-teal-700 mb-6">
+            The Actors: Your Chess Pieces
+          </h2>
+          <p class="text-lg text-gray-700 mb-6">
+            Each player starts with 16 pieces: one King, one Queen, two Rooks,
+            two Knights, two Bishops, and eight Pawns. Each piece has its own
+            unique way of moving, making the game a dynamic dance of different
+            abilities. Click on the piece on the small board to see its moves!
+          </p>
+
+          <!-- Piece: Pawn -->
+          <div
+            class="flex flex-col md:flex-row items-center md:items-start mb-8 p-4 bg-white rounded-xl shadow-sm border border-gray-200"
+          >
+            <div class="flex-shrink-0 mr-0 md:mr-6 mb-4 md:mb-0">
+              <svg
+                class="chess-piece-svg text-gray-800"
+                viewBox="0 0 45 45"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M22.5 10C20.5714 10 19 11.5714 19 13.5C19 15.4286 20.5714 17 22.5 17C24.4286 17 26 15.4286 26 13.5C26 11.5714 24.4286 10 22.5 10Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M22.5 17V35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M16 35H29"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M19 35V38C19 39.1046 19.8954 40 21 40H24C25.1046 40 26 39.1046 26 38V35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-2xl font-semibold text-teal-600 mb-2">
+                The Pawn
+              </h3>
+              <p class="text-lg text-gray-700 mb-4">
+                The Pawn is the most numerous piece and the "soul of chess." It
+                moves one square forward, but captures diagonally one square
+                forward. On its very first move, a Pawn can move two squares
+                forward. If a Pawn reaches the opposite side of the board, it
+                can be promoted to a Queen (or Rook, Knight, Bishop) – a
+                powerful transformation!
+              </p>
+              <div
+                id="pawn-board"
+                class="interactive-board mx-auto md:mx-0"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Piece: Rook -->
+          <div
+            class="flex flex-col md:flex-row items-center md:items-start mb-8 p-4 bg-white rounded-xl shadow-sm border border-gray-200"
+          >
+            <div class="flex-shrink-0 mr-0 md:mr-6 mb-4 md:mb-0">
+              <svg
+                class="chess-piece-svg text-gray-800"
+                viewBox="0 0 45 45"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 10H33V13H12V10Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M14 13V35H31V13"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M12 35H33"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M17 35V38C17 39.1046 17.8954 40 19 40H26C27.1046 40 28 39.1046 28 38V35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-2xl font-semibold text-teal-600 mb-2">
+                The Rook
+              </h3>
+              <p class="text-lg text-gray-700 mb-4">
+                The Rook is a powerful, straight-moving piece. It moves any
+                number of squares horizontally or vertically. Rooks are often
+                involved in the endgame and can be devastating when working
+                together.
+              </p>
+              <div
+                id="rook-board"
+                class="interactive-board mx-auto md:mx-0"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Piece: Knight -->
+          <div
+            class="flex flex-col md:flex-row items-center md:items-start mb-8 p-4 bg-white rounded-xl shadow-sm border border-gray-200"
+          >
+            <div class="flex-shrink-0 mr-0 md:mr-6 mb-4 md:mb-0">
+              <svg
+                class="chess-piece-svg text-gray-800"
+                viewBox="0 0 45 45"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17 10C17 11.6569 18.3431 13 20 13H25C26.6569 13 28 11.6569 28 10C28 8.34315 26.6569 7 25 7H20C18.3431 7 17 8.34315 17 10Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M22.5 13V35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M16 35H29"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M19 35V38C19 39.1046 19.8954 40 21 40H24C25.1046 40 26 39.1046 26 38V35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M28 13C29.6569 13 31 14.3431 31 16V22C31 23.6569 29.6569 25 28 25H22.5"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-2xl font-semibold text-teal-600 mb-2">
+                The Knight
+              </h3>
+              <p class="text-lg text-gray-700 mb-4">
+                The Knight is the trickiest piece! It moves in an "L" shape: two
+                squares in one direction (horizontal or vertical) and then one
+                square perpendicular to that. It's the only piece that can jump
+                over other pieces, making it excellent for surprising attacks.
+              </p>
+              <div
+                id="knight-board"
+                class="interactive-board mx-auto md:mx-0"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Piece: Bishop -->
+          <div
+            class="flex flex-col md:flex-row items-center md:items-start mb-8 p-4 bg-white rounded-xl shadow-sm border border-gray-200"
+          >
+            <div class="flex-shrink-0 mr-0 md:mr-6 mb-4 md:mb-0">
+              <svg
+                class="chess-piece-svg text-gray-800"
+                viewBox="0 0 45 45"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M22.5 10C20.5714 10 19 11.5714 19 13.5C19 15.4286 20.5714 17 22.5 17C24.4286 17 26 15.4286 26 13.5C26 11.5714 24.4286 10 22.5 10Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M22.5 17V35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M16 35H29"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M19 35V38C19 39.1046 19.8954 40 21 40H24C25.1046 40 26 39.1046 26 38V35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M16 17L29 35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M29 17L16 35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-2xl font-semibold text-teal-600 mb-2">
+                The Bishop
+              </h3>
+              <p class="text-lg text-gray-700 mb-4">
+                The Bishop moves any number of squares diagonally. Each player
+                has two Bishops: one that moves only on light squares and one
+                that moves only on dark squares. They are powerful long-range
+                pieces, especially when working together.
+              </p>
+              <div
+                id="bishop-board"
+                class="interactive-board mx-auto md:mx-0"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Piece: Queen -->
+          <div
+            class="flex flex-col md:flex-row items-center md:items-start mb-8 p-4 bg-white rounded-xl shadow-sm border border-gray-200"
+          >
+            <div class="flex-shrink-0 mr-0 md:mr-6 mb-4 md:mb-0">
+              <svg
+                class="chess-piece-svg text-gray-800"
+                viewBox="0 0 45 45"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M22.5 10C20.5714 10 19 11.5714 19 13.5C19 15.4286 20.5714 17 22.5 17C24.4286 17 26 15.4286 26 13.5C26 11.5714 24.4286 10 22.5 10Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M22.5 17V35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M16 35H29"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M19 35V38C19 39.1046 19.8954 40 21 40H24C25.1046 40 26 39.1046 26 38V35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M12 17H33"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M12 17L22.5 7L33 17"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-2xl font-semibold text-teal-600 mb-2">
+                The Queen
+              </h3>
+              <p class="text-lg text-gray-700 mb-4">
+                The Queen is the most powerful piece on the board! She combines
+                the moves of the Rook and the Bishop, meaning she can move any
+                number of squares horizontally, vertically, or diagonally. She
+                is a force to be reckoned with!
+              </p>
+              <div
+                id="queen-board"
+                class="interactive-board mx-auto md:mx-0"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Piece: King -->
+          <div
+            class="flex flex-col md:flex-row items-center md:items-start mb-8 p-4 bg-white rounded-xl shadow-sm border border-gray-200"
+          >
+            <div class="flex-shrink-0 mr-0 md:mr-6 mb-4 md:mb-0">
+              <svg
+                class="chess-piece-svg text-gray-800"
+                viewBox="0 0 45 45"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M22.5 10C20.5714 10 19 11.5714 19 13.5C19 15.4286 20.5714 17 22.5 17C24.4286 17 26 15.4286 26 13.5C26 11.5714 24.4286 10 22.5 10Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M22.5 17V35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M16 35H29"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M19 35V38C19 39.1046 19.8954 40 21 40H24C25.1046 40 26 39.1046 26 38V35"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M22.5 7V10"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M20 8.5H25"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-2xl font-semibold text-teal-600 mb-2">
+                The King
+              </h3>
+              <p class="text-lg text-gray-700 mb-4">
+                The King is the most important piece! He can move one square in
+                any direction (horizontally, vertically, or diagonally).
+                Although he moves slowly, protecting your King is the ultimate
+                goal of the game. If your King is captured, you lose!
+              </p>
+              <div
+                id="king-board"
+                class="interactive-board mx-auto md:mx-0"
+              ></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- The Objective: Check and Checkmate -->
+        <section class="mb-10 p-6 bg-gray-50 rounded-xl shadow-inner">
+          <h2 class="text-3xl font-bold text-teal-700 mb-4">
+            The Goal: Checkmate!
+          </h2>
+          <p class="text-lg text-gray-700 mb-4">
+            The objective of chess is to capture the opponent's King. However,
+            you don't actually capture it. Instead, you put it in a position
+            where it is under attack and cannot escape. This is called
+            <strong class="font-semibold text-teal-600">Checkmate</strong>.
+          </p>
+          <ul
+            class="list-disc list-inside text-lg text-gray-700 space-y-2 mb-4"
+          >
+            <li>
+              <strong class="font-semibold text-teal-600">Check:</strong> When a
+              King is under attack by an opponent's piece, it is "in check." The
+              player whose King is in check must immediately move their King to
+              safety, block the attack, or capture the attacking piece.
+            </li>
+            <li>
+              <strong class="font-semibold text-teal-600">Checkmate:</strong> If
+              a King is in check and there is NO legal way to get out of check,
+              then it is "checkmate," and the game is over. The player whose
+              King is checkmated loses.
+            </li>
+          </ul>
+          <p class="text-lg text-gray-700 mb-4">
+            See the example below of a King in check. The black King is on e8
+            and the white Rook is on e1. The King is in check!
+          </p>
+          <div class="flex justify-center items-center mb-6">
+            <div id="check-board" class="interactive-board"></div>
+          </div>
+          <p class="text-lg text-gray-700">
+            The beauty of checkmate lies in the intricate patterns and forced
+            sequences of moves that lead to an inescapable position for the
+            King. It's the ultimate strategic triumph!
+          </p>
+        </section>
+
+        <!-- Why Chess is Beautiful -->
+        <section
+          class="mb-10 p-6 bg-gradient-to-br-custom rounded-2xl shadow-lg text-white"
+        >
+          <h2 class="text-3xl font-bold mb-4">Why Chess is a Beautiful Game</h2>
+          <ul class="list-disc list-inside text-lg space-y-3">
+            <li>
+              <strong class="font-semibold">Logical Elegance:</strong> Every
+              move has a reason, and the best moves often combine logic with
+              intuition, leading to positions of profound beauty.
+            </li>
+            <li>
+              <strong class="font-semibold">Strategic Depth:</strong> From the
+              very first move, you're planning, anticipating, and adapting. The
+              game is a constant dance of attack and defense, where foresight is
+              key.
+            </li>
+            <li>
+              <strong class="font-semibold">Creative Expression:</strong> Chess
+              is not just about calculation; it's about imagination. Finding a
+              brilliant sacrifice, a clever tactical sequence, or a subtle
+              positional maneuver is like creating a work of art.
+            </li>
+            <li>
+              <strong class="font-semibold">Timeless Appeal:</strong> Its rules
+              are simple, but its possibilities are infinite. No two chess games
+              are ever truly alike, offering endless discovery and challenge.
+            </li>
+            <li>
+              <strong class="font-semibold">Universal Language:</strong> Chess
+              transcends cultures and languages. It's a common ground for people
+              all over the world to connect and compete.
+            </li>
+          </ul>
+        </section>
+
+        <!-- Quick Quiz Section -->
+        <section class="mb-10 p-6 bg-gray-50 rounded-xl shadow-inner">
+          <h2 class="text-3xl font-bold text-teal-700 mb-4">
+            Quick Quiz: Test Your Knowledge!
+          </h2>
+          <form id="quiz-form" class="space-y-6">
+            <!-- Question 1 -->
+            <div
+              class="bg-white p-5 rounded-xl shadow-sm border border-gray-200"
+            >
+              <p class="text-lg font-medium text-gray-800 mb-3">
+                1. Which piece moves in an "L" shape?
+              </p>
+              <div class="space-y-2">
+                <label class="flex items-center text-gray-700">
+                  <input
+                    type="radio"
+                    name="q1"
+                    value="rook"
+                    class="form-radio h-4 w-4 text-teal-600"
+                  />
+                  <span class="ml-2">Rook</span>
+                </label>
+                <label class="flex items-center text-gray-700">
+                  <input
+                    type="radio"
+                    name="q1"
+                    value="knight"
+                    class="form-radio h-4 w-4 text-teal-600"
+                  />
+                  <span class="ml-2">Knight</span>
+                </label>
+                <label class="flex items-center text-gray-700">
+                  <input
+                    type="radio"
+                    name="q1"
+                    value="bishop"
+                    class="form-radio h-4 w-4 text-teal-600"
+                  />
+                  <span class="ml-2">Bishop</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div
+              class="bg-white p-5 rounded-xl shadow-sm border border-gray-200"
+            >
+              <p class="text-lg font-medium text-gray-800 mb-3">
+                2. What is the ultimate goal in chess?
+              </p>
+              <div class="space-y-2">
+                <label class="flex items-center text-gray-700">
+                  <input
+                    type="radio"
+                    name="q2"
+                    value="capture_all"
+                    class="form-radio h-4 w-4 text-teal-600"
+                  />
+                  <span class="ml-2">Capture all opponent's pieces</span>
+                </label>
+                <label class="flex items-center text-gray-700">
+                  <input
+                    type="radio"
+                    name="q2"
+                    value="checkmate"
+                    class="form-radio h-4 w-4 text-teal-600"
+                  />
+                  <span class="ml-2">Achieve Checkmate</span>
+                </label>
+                <label class="flex items-center text-gray-700">
+                  <input
+                    type="radio"
+                    name="q2"
+                    value="promote_pawn"
+                    class="form-radio h-4 w-4 text-teal-600"
+                  />
+                  <span class="ml-2">Promote a pawn</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div
+              class="bg-white p-5 rounded-xl shadow-sm border border-gray-200"
+            >
+              <p class="text-lg font-medium text-gray-800 mb-3">
+                3. Which piece is the most powerful?
+              </p>
+              <div class="space-y-2">
+                <label class="flex items-center text-gray-700">
+                  <input
+                    type="radio"
+                    name="q3"
+                    value="king"
+                    class="form-radio h-4 w-4 text-teal-600"
+                  />
+                  <span class="ml-2">King</span>
+                </label>
+                <label class="flex items-center text-gray-700">
+                  <input
+                    type="radio"
+                    name="q3"
+                    value="queen"
+                    class="form-radio h-4 w-4 text-teal-600"
+                  />
+                  <span class="ml-2">Queen</span>
+                </label>
+                <label class="flex items-center text-gray-700">
+                  <input
+                    type="radio"
+                    name="q3"
+                    value="pawn"
+                    class="form-radio h-4 w-4 text-teal-600"
+                  />
+                  <span class="ml-2">Pawn</span>
+                </label>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="w-full py-3 px-6 bg-teal-600 text-white font-semibold rounded-lg shadow-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition duration-200"
+            >
+              Submit Answers
+            </button>
+          </form>
+          <div
+            id="quiz-results"
+            class="mt-6 p-4 bg-gray-100 rounded-lg text-center font-medium text-gray-800 hidden"
+          ></div>
+        </section>
+
+        <!-- Conclusion -->
+        <section>
+          <h2 class="text-3xl font-bold text-teal-700 mb-4">
+            Your Journey Begins!
+          </h2>
+          <p class="text-lg text-gray-700 mb-4">
+            You now have the basic understanding of the chessboard, the pieces,
+            their movements, and the ultimate goal of checkmate. This is just
+            the beginning of a fascinating journey!
+          </p>
+          <p class="text-lg text-gray-700 mb-4">
+            The true beauty of chess unfolds as you play, learn from your
+            mistakes, and discover new strategies. Don't be afraid to
+            experiment, and most importantly, have fun!
+          </p>
+          <p class="text-lg text-gray-700 font-semibold">
+            Practice makes perfect. Find a friend, an online opponent, or a
+            chess puzzle, and start playing!
+          </p>
+        </section>
+      </main>
+
+      <!-- Footer Section -->
+      <footer class="w-full max-w-4xl text-center text-gray-500 text-sm mt-8">
+        <p>&copy; 2025 The Beauty of Chess Course. All rights reserved.</p>
+      </footer>
+    </div>
+
+    <!-- Message Box for Alerts -->
+    <div id="message-box-overlay" class="message-box-overlay"></div>
+    <div id="message-box" class="message-box">
+      <p
+        id="message-box-text"
+        class="text-lg font-semibold text-gray-800 mb-4"
+      ></p>
+      <button
+        id="message-box-close"
+        class="w-full py-2 px-4 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+      >
+        Close
+      </button>
+    </div>
+
+    <script>
+      // Custom message box function instead of alert()
+      function showMessageBox(message) {
+        document.getElementById("message-box-text").textContent = message;
+        document.getElementById("message-box").style.display = "block";
+        document.getElementById("message-box-overlay").style.display = "block";
+      }
+
+      document
+        .getElementById("message-box-close")
+        .addEventListener("click", function () {
+          document.getElementById("message-box").style.display = "none";
+          document.getElementById("message-box-overlay").style.display = "none";
+        });
+
+      // Function to create and render an interactive board
+      function createInteractiveBoard(
+        containerId,
+        piece,
+        startRow,
+        startCol,
+        initialPieces = {}
+      ) {
+        const container = document.getElementById(containerId);
+        if (!container) return; // Exit if container not found
+
+        container.innerHTML = ""; // Clear previous content
+        const board = [];
+
+        for (let i = 0; i < 64; i++) {
+          const row = Math.floor(i / 8);
+          const col = i % 8;
+          const isDark = (row + col) % 2 === 1;
+          const square = document.createElement("div");
+          square.className = `interactive-square ${
+            isDark ? "square-dark" : "square-light"
+          }`;
+          square.dataset.row = row;
+          square.dataset.col = col;
+
+          // Place the main piece
+          if (row === startRow && col === startCol) {
+            const pieceDiv = document.createElement("div");
+            pieceDiv.className = `interactive-piece interactive-piece-black`; // Default black piece
+            pieceDiv.innerHTML = getPieceSVG(piece); // Use SVG for piece
+            square.appendChild(pieceDiv);
+            square.classList.add("square-start"); // Highlight starting square
+          } else if (initialPieces[`${row},${col}`]) {
+            // Place other initial pieces if any
+            const otherPiece = initialPieces[`${row},${col}`];
+            const pieceDiv = document.createElement("div");
+            pieceDiv.className = `interactive-piece ${
+              otherPiece.color === "white"
+                ? "interactive-piece-white"
+                : "interactive-piece-black"
+            }`;
+            pieceDiv.innerHTML = getPieceSVG(otherPiece.type);
+            square.appendChild(pieceDiv);
+          }
+          board.push(square);
+          container.appendChild(square);
+        }
+
+        // Event listener for highlighting moves
+        container.addEventListener("click", function (event) {
+          // Clear all highlights first
+          board.forEach((s) => {
+            s.classList.remove("square-highlight");
+            s.classList.remove("square-start");
+            s.classList.remove("square-check");
+          });
+
+          // Re-add the starting square highlight
+          const startSquare = board.find(
+            (s) =>
+              parseInt(s.dataset.row) === startRow &&
+              parseInt(s.dataset.col) === startCol
+          );
+          if (startSquare) {
+            startSquare.classList.add("square-start");
+          }
+
+          // Highlight moves based on the piece type
+          const moves = getPossibleMoves(piece, startRow, startCol);
+          moves.forEach((move) => {
+            const targetSquare = board.find(
+              (s) =>
+                parseInt(s.dataset.row) === move[0] &&
+                parseInt(s.dataset.col) === move[1]
+            );
+            if (targetSquare) {
+              targetSquare.classList.add("square-highlight");
+            }
+          });
+
+          // For check scenario, highlight the king and attacking piece
+          if (containerId === "check-board") {
+            const kingSquare = board.find(
+              (s) =>
+                parseInt(s.dataset.row) === 0 && parseInt(s.dataset.col) === 4
+            ); // Black King on e8
+            const rookSquare = board.find(
+              (s) =>
+                parseInt(s.dataset.row) === 7 && parseInt(s.dataset.col) === 4
+            ); // White Rook on e1
+            if (kingSquare) kingSquare.classList.add("square-check");
+            if (rookSquare) rookSquare.classList.add("square-start"); // Highlight attacking piece
+          }
+        });
+      }
+
+      // Helper to get SVG for piece
+      function getPieceSVG(pieceType) {
+        // Using simplified SVGs for demonstration. In a real app, you'd use full chess piece SVGs.
+        const pieces = {
+          pawn: `<svg viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.5 10C20.5714 10 19 11.5714 19 13.5C19 15.4286 20.5714 17 22.5 17C24.4286 17 26 15.4286 26 13.5C26 11.5714 24.4286 10 22.5 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.5 17V35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 35H29" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 35V38C19 39.1046 19.8954 40 21 40H24C25.1046 40 26 39.1046 26 38V35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+          rook: `<svg viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 10H33V13H12V10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 13V35H31V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 35H33" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 35V38C17 39.1046 17.8954 40 19 40H26C27.1046 40 28 39.1046 28 38V35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+          knight: `<svg viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 10C17 11.6569 18.3431 13 20 13H25C26.6569 13 28 11.6569 28 10C28 8.34315 26.6569 7 25 7H20C18.3431 7 17 8.34315 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.5 13V35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 35H29" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 35V38C19 39.1046 19.8954 40 21 40H24C25.1046 40 26 39.1046 26 38V35"/><path d="M28 13C29.6569 13 31 14.3431 31 16V22C31 23.6569 29.6569 25 28 25H22.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+          bishop: `<svg viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.5 10C20.5714 10 19 11.5714 19 13.5C19 15.4286 20.5714 17 22.5 17C24.4286 17 26 15.4286 26 13.5C26 11.5714 24.4286 10 22.5 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.5 17V35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 35H29" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 35V38C19 39.1046 19.8954 40 21 40H24C25.1046 40 26 39.1046 26 38V35"/><path d="M16 17L29 35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 17L16 35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+          queen: `<svg viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.5 10C20.5714 10 19 11.5714 19 13.5C19 15.4286 20.5714 17 22.5 17C24.4286 17 26 15.4286 26 13.5C26 11.5714 24.4286 10 22.5 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.5 17V35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 35H29" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 35V38C19 39.1046 19.8954 40 21 40H24C25.1046 40 26 39.1046 26 38V35"/><path d="M12 17H33" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 17L22.5 7L33 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+          king: `<svg viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.5 10C20.5714 10 19 11.5714 19 13.5C19 15.4286 20.5714 17 22.5 17C24.4286 17 26 15.4286 26 13.5C26 11.5714 24.4286 10 22.5 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.5 17V35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 35H29" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 35V38C19 39.1046 19.8954 40 21 40H24C25.1046 40 26 39.1046 26 38V35"/><path d="M22.5 7V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 8.5H25" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+        };
+        return pieces[pieceType] || "";
+      }
+
+      // Function to calculate possible moves for a piece (simplified for demo)
+      function getPossibleMoves(piece, r, c) {
+        const moves = [];
+        const boardSize = 8; // 8x8 board
+
+        function isValid(row, col) {
+          return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
+        }
+
+        switch (piece) {
+          case "pawn":
+            // White pawn moving up (row decreases)
+            if (isValid(r - 1, c)) moves.push([r - 1, c]); // One square forward
+            if (r === 6 && isValid(r - 2, c)) moves.push([r - 2, c]); // Two squares on first move
+            // For demonstration, also show capture squares (even if empty)
+            if (isValid(r - 1, c - 1)) moves.push([r - 1, c - 1]);
+            if (isValid(r - 1, c + 1)) moves.push([r - 1, c + 1]);
+            break;
+          case "rook":
+            // Horizontal moves
+            for (let i = 0; i < boardSize; i++) {
+              if (i !== c) moves.push([r, i]);
+            }
+            // Vertical moves
+            for (let i = 0; i < boardSize; i++) {
+              if (i !== r) moves.push([i, c]);
+            }
+            break;
+          case "knight":
+            const knightMoves = [
+              [-2, -1],
+              [-2, 1],
+              [-1, -2],
+              [-1, 2],
+              [1, -2],
+              [1, 2],
+              [2, -1],
+              [2, 1],
+            ];
+            knightMoves.forEach((move) => {
+              const newR = r + move[0];
+              const newC = c + move[1];
+              if (isValid(newR, newC)) moves.push([newR, newC]);
+            });
+            break;
+          case "bishop":
+            // Diagonal moves
+            for (let i = 1; i < boardSize; i++) {
+              if (isValid(r + i, c + i)) moves.push([r + i, c + i]);
+              if (isValid(r + i, c - i)) moves.push([r + i, c - i]);
+              if (isValid(r - i, c + i)) moves.push([r - i, c + i]);
+              if (isValid(r - i, c - i)) moves.push([r - i, c - i]);
+            }
+            break;
+          case "queen":
+            // Combines Rook and Bishop moves
+            // Horizontal moves
+            for (let i = 0; i < boardSize; i++) {
+              if (i !== c) moves.push([r, i]);
+            }
+            // Vertical moves
+            for (let i = 0; i < boardSize; i++) {
+              if (i !== r) moves.push([i, c]);
+            }
+            // Diagonal moves
+            for (let i = 1; i < boardSize; i++) {
+              if (isValid(r + i, c + i)) moves.push([r + i, c + i]);
+              if (isValid(r + i, c - i)) moves.push([r + i, c - i]);
+              if (isValid(r - i, c + i)) moves.push([r - i, c + i]);
+              if (isValid(r - i, c - i)) moves.push([r - i, c - i]);
+            }
+            break;
+          case "king":
+            const kingMoves = [
+              [-1, -1],
+              [-1, 0],
+              [-1, 1],
+              [0, -1],
+              [0, 1],
+              [1, -1],
+              [1, 0],
+              [1, 1],
+            ];
+            kingMoves.forEach((move) => {
+              const newR = r + move[0];
+              const newC = c + move[1];
+              if (isValid(newR, newC)) moves.push([newR, newC]);
+            });
+            break;
+        }
+        return moves;
+      }
+
+      // Initialize interactive boards on window load
+      window.onload = function () {
+        // Pawn starts at row 6 (2nd rank from white's perspective)
+        createInteractiveBoard("pawn-board", "pawn", 6, 4); // Pawn on e2 (row 6, col 4)
+        createInteractiveBoard("rook-board", "rook", 3, 3); // Rook on d5 (row 3, col 3)
+        createInteractiveBoard("knight-board", "knight", 3, 3); // Knight on d5 (row 3, col 3)
+        createInteractiveBoard("bishop-board", "bishop", 3, 3); // Bishop on d5 (row 3, col 3)
+        createInteractiveBoard("queen-board", "queen", 3, 3); // Queen on d5 (row 3, col 3)
+        createInteractiveBoard("king-board", "king", 3, 3); // King on d5 (row 3, col 3)
+
+        // Check scenario: Black King on e8 (row 0, col 4), White Rook on e1 (row 7, col 4)
+        createInteractiveBoard("check-board", "king", 0, 4, {
+          "7,4": { type: "rook", color: "white" }, // Add a white rook
+        });
+        // Manually trigger highlight for check-board after creation
+        const checkBoardContainer = document.getElementById("check-board");
+        if (checkBoardContainer) {
+          checkBoardContainer.dispatchEvent(new Event("click")); // Simulate a click to highlight
+        }
+      };
+
+      // Quiz Logic
+      const quizForm = document.getElementById("quiz-form");
+      const quizResults = document.getElementById("quiz-results");
+
+      quizForm.addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const answers = {
+          q1: quizForm.elements["q1"].value,
+          q2: quizForm.elements["q2"].value,
+          q3: quizForm.elements["q3"].value,
+        };
+
+        const correctAnswers = {
+          q1: "knight",
+          q2: "checkmate",
+          q3: "queen",
+        };
+
+        let score = 0;
+        let totalQuestions = 0;
+        let feedbackHtml = "";
+
+        for (const q in correctAnswers) {
+          totalQuestions++;
+          const userAnswer = answers[q];
+          const correctAnswer = correctAnswers[q];
+          const questionNumber = q.replace("q", "");
+          const questionElement = quizForm
+            .querySelector(`input[name="${q}"]`)
+            .closest(".bg-white");
+
+          if (userAnswer === correctAnswer) {
+            score++;
+            feedbackHtml += `<p class="text-green-700">Question ${questionNumber}: Correct!</p>`;
+            questionElement.classList.remove("border-red-400");
+            questionElement.classList.add("border-green-400");
+          } else {
+            feedbackHtml += `<p class="text-red-700">Question ${questionNumber}: Incorrect. The correct answer was "${
+              correctAnswer.charAt(0).toUpperCase() + correctAnswer.slice(1)
+            }".</p>`;
+            questionElement.classList.remove("border-green-400");
+            questionElement.classList.add("border-red-400");
+          }
+        }
+
+        quizResults.innerHTML = `<p class="text-xl font-bold mb-2">Your Score: ${score} out of ${totalQuestions}</p>${feedbackHtml}`;
+        quizResults.classList.remove("hidden");
+        quizResults.scrollIntoView({ behavior: "smooth" }); // Scroll to results
+      });
+    </script>
+  </body>
+</html>
